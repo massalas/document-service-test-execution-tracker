@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JIRA Test Execution Monitor - SA-164329</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <!-- Animated background grid -->
+    <div class="bg-grid"></div>
+
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-edition">Test Execution Monitor • SA-164329</div>
+            <h1 class="header-title">
+                <span class="header-title-main">AFS004 Approval Manager</span>
+                <span class="header-subtitle">Test Execution Progress</span>
+            </h1>
+            <div class="header-meta">
+                <div class="meta-item">
+                    <span class="meta-key">Date</span>
+                    <span class="meta-value" id="currentDate">—</span>
+                </div>
+                <div class="meta-divider">•</div>
+                <div class="meta-item">
+                    <span class="meta-key">Last Updated</span>
+                    <span class="meta-value" id="lastUpdated">—</span>
+                </div>
+                <div class="meta-divider">•</div>
+                <div class="meta-item">
+                    <span class="meta-key">Executors</span>
+                    <span class="meta-value" id="executorCount">0</span>
+                </div>
+            </div>
+            <div class="scan-control">
+                <button id="scanButton" class="scan-button" onclick="triggerScan()">
+                    <span id="scanButtonIcon" class="scan-button-icon">⟳</span>
+                    <span id="scanButtonText" class="scan-button-text">Scan Now</span>
+                </button>
+                <span id="scanStatusText" class="scan-status-text"></span>
+            </div>
+            <div class="header-border"></div>
+        </header>
+
+        <!-- Overall Test Execution Status -->
+        <section class="execution-status-section" data-animate>
+            <div class="section-header">
+                <div class="section-number">00</div>
+                <h2 class="section-title">SA-164329 Overall Status</h2>
+                <p class="section-lead">Complete test execution progress</p>
+            </div>
+
+            <div class="execution-status-card">
+                <div class="execution-progress">
+                    <div class="progress-header">
+                        <div class="progress-title">Execution Progress</div>
+                        <div class="progress-percentage" id="executionPercentage">—</div>
+                    </div>
+                    <div class="progress-bar-container">
+                        <div class="progress-bar" id="executionProgressBar" style="width: 0%"></div>
+                    </div>
+                    <div class="progress-stats">
+                        <div class="progress-stat">
+                            <span class="progress-stat-value" id="totalExecuted">—</span>
+                            <span class="progress-stat-label">Executed</span>
+                        </div>
+                        <div class="progress-stat">
+                            <span class="progress-stat-value" id="totalPending">—</span>
+                            <span class="progress-stat-label">Pending</span>
+                        </div>
+                        <div class="progress-stat">
+                            <span class="progress-stat-value" id="totalTestCount">—</span>
+                            <span class="progress-stat-label">Total Tests</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="status-breakdown">
+                    <div class="breakdown-title">Status Breakdown</div>
+                    <div class="breakdown-grid">
+                        <div class="breakdown-item breakdown-pass">
+                            <div class="breakdown-icon">✅</div>
+                            <div class="breakdown-value" id="statusPass">—</div>
+                            <div class="breakdown-label">Pass</div>
+                        </div>
+                        <div class="breakdown-item breakdown-fail">
+                            <div class="breakdown-icon">❌</div>
+                            <div class="breakdown-value" id="statusFail">—</div>
+                            <div class="breakdown-label">Fail</div>
+                        </div>
+                        <div class="breakdown-item breakdown-todo">
+                            <div class="breakdown-icon">📋</div>
+                            <div class="breakdown-value" id="statusTodo">—</div>
+                            <div class="breakdown-label">To Do</div>
+                        </div>
+                        <div class="breakdown-item breakdown-executing">
+                            <div class="breakdown-icon">⚡</div>
+                            <div class="breakdown-value" id="statusExecuting">—</div>
+                            <div class="breakdown-label">Executing</div>
+                        </div>
+                        <div class="breakdown-item breakdown-blocked">
+                            <div class="breakdown-icon">🚫</div>
+                            <div class="breakdown-value" id="statusBlocked">—</div>
+                            <div class="breakdown-label">Blocked</div>
+                        </div>
+                        <div class="breakdown-item breakdown-passrate">
+                            <div class="breakdown-icon">📈</div>
+                            <div class="breakdown-value" id="statusPassRate">—</div>
+                            <div class="breakdown-label">Pass Rate</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats Panel -->
+        <section class="stats-section" data-animate>
+            <div class="section-header">
+                <div class="section-number">01</div>
+                <h2 class="section-title">Today's Execution</h2>
+                <p class="section-lead">Test execution progress for current day</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalPassed">—</div>
+                    <div class="stat-label">Tests Passed</div>
+                    <div class="stat-icon">✅</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalFailed">—</div>
+                    <div class="stat-label">Tests Failed</div>
+                    <div class="stat-icon">❌</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalTests">—</div>
+                    <div class="stat-label">Total Completed</div>
+                    <div class="stat-icon">📊</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="passRate">—</div>
+                    <div class="stat-label">Pass Rate</div>
+                    <div class="stat-icon">📈</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Executor Leaderboard -->
+        <section class="leaderboard-section" data-animate>
+            <div class="section-header">
+                <div class="section-number">02</div>
+                <h2 class="section-title">Executor Leaderboard</h2>
+                <p class="section-lead">Test execution rankings by volume</p>
+            </div>
+
+            <div class="leaderboard-grid" id="leaderboard">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading test execution data...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Charts Section -->
+        <section class="charts-section" data-animate>
+            <div class="section-header">
+                <div class="section-number">03</div>
+                <h2 class="section-title">Data Visualization</h2>
+                <p class="section-lead">Test execution trends and analysis</p>
+            </div>
+
+            <div class="charts-grid">
+                <div class="chart-frame">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Pass/Fail Distribution</h3>
+                        <p class="chart-caption">Today's test results breakdown</p>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="passFailChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-frame">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Executor Distribution</h3>
+                        <p class="chart-caption">Tests completed by person</p>
+                    </div>
+                    <div class="chart-body">
+                        <canvas id="executorChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-frame chart-frame--wide">
+                    <div class="chart-header">
+                        <h3 class="chart-title">Historical Trend</h3>
+                        <p class="chart-caption">Test executions over the last 30 days</p>
+                    </div>
+                    <div class="chart-body chart-body--tall">
+                        <canvas id="trendChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Overall Leaders Section -->
+        <section class="overall-section" data-animate>
+            <div class="section-header">
+                <div class="section-number">04</div>
+                <h2 class="section-title">Overall Leaders</h2>
+                <p class="section-lead">Cumulative test execution rankings for entire SA-164329</p>
+            </div>
+
+            <div class="overall-grid" id="overallLeaders">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading overall statistics...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Archived Test Executions Section -->
+        <section class="archive-section" data-animate>
+            <div class="section-header">
+                <div class="section-number">05</div>
+                <h2 class="section-title">Archived Test Executions</h2>
+                <p class="section-lead">Historical data from previous test execution tracking</p>
+            </div>
+
+            <div id="archiveContainer">
+                <div class="loading-state">
+                    <div class="loading-spinner"></div>
+                    <p>Loading archived data...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-border"></div>
+            <div class="footer-content">
+                <p class="footer-text">JIRA Test Execution Monitor • SA-164329 • Click "Scan Now" to fetch the latest data</p>
+            </div>
+        </footer>
+
+        <!-- Error Toast -->
+        <div id="errorMessage" class="error-toast" style="display: none;">
+            <div class="error-content">
+                <div class="error-title">Unable to Load Data</div>
+                <div class="error-text" id="errorText"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='app.js') }}"></script>
+</body>
+</html>

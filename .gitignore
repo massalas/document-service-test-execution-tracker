@@ -1,0 +1,36 @@
+# Runtime data and logs
+data/
+*.log
+*.pid
+
+# Backup files
+*.backup
+*~
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary/debug scripts (not production code)
+debug-*.py
+show-*.py
+test-*.py.old
+.env
